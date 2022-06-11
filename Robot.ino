@@ -7,8 +7,13 @@
 
 #define PIN_ACTIVATION 7
 
-#define PIN_TRIGGER 11
-#define PIN_ECHO 10
+#define TRIGGER_PIN 11
+#define ECHO_PIN 10
+
+#define MOTOR1_PIN1 2
+#define MOTOR1_PIN2 3
+#define MOTOR2_PIN1 4
+#define MOTOR2_PIN2 5
 
 #define LINE_FRONT_PIN A0
 #define LINE_BACK_PIN A1
@@ -27,6 +32,13 @@ int gx, gy, gz; // Giroscopio (Aceleracion de g)
 long t;		// timepo que demora en llegar el eco
 long distance; // distancia en centimetros
 
+bool lineFront = false; //TRUE si es blanco
+bool lineBack = false; 	//TRUE si es blanco
+bool lineLeft = false; 	//TRUE si es blanco
+bool lineRight = false; //TRUE si es blanco
+
+int speed = 100; //Velocidad del robot en %
+
 void setup()
 {
 	Serial.begin(9600);
@@ -34,17 +46,17 @@ void setup()
 	mpu.initialize();
 	Serial.println(mpu.testConnection() ? F("IMU iniciado correctamente") : F("Error al iniciar IMU"));
 
-	pinMode(Trigger, OUTPUT);   // pin como salida
-	pinMode(Echo, INPUT);	   // pin como entrada
-	digitalWrite(Trigger, LOW); // Inicializamos el pin con 0
+	pinMode(TRIGGER_PIN, OUTPUT);   // pin como salida
+	pinMode(ECHO_PIN, INPUT);	   // pin como entrada
+	digitalWrite(TRIGGER_PIN, LOW); // Inicializamos el pin con 0
 }
 
 void get_distance()
 {
-	digitalWrite(Trigger, HIGH);
+	digitalWrite(TRIGGER_PIN, HIGH);
 	delayMicroseconds(10);
-	digitalWrite(Trigger, LOW);
-	t = pulseIn(Echo, HIGH);
+	digitalWrite(TRIGGER_PIN, LOW);
+	t = pulseIn(ECHO_PIN, HIGH);
 	distance = (t / 2) / 29.1;
 }
 
@@ -55,10 +67,70 @@ void get_sensor_data()
 	mpu.getRotation(&gx, &gy, &gz);
 }
 
+void get_lines()
+{
+	lineFront = analogRead(LINE_FRONT_PIN) > WHITE_LINE_VALUE;
+	lineBack = analogRead(LINE_BACK_PIN) > WHITE_LINE_VALUE;
+	lineLeft = analogRead(LINE_LEFT_PIN) > WHITE_LINE_VALUE;
+	lineRight = analogRead(LINE_RIGHT_PIN) > WHITE_LINE_VALUE;
+}
+
+void MotorHorario(int _motor,int _speed)
+{
+	//CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
+	switch (_motor)
+	{
+		case 1:
+			digitalWrite (MOTOR1_PIN1, (int)(_speed*255)));
+			digitalWrite (MOTOR1_PIN2, LOW);
+		break;
+
+		case 2:
+			digitalWrite (MOTOR2_PIN1, (int)(_speed*255));
+			digitalWrite (MOTOR2_PIN2, LOW);
+		break;
+	}
+}
+
+void MotorAntihorario(int _motor, int _speed)
+{
+	//CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
+	switch (_motor)
+	{
+		case 1:
+			digitalWrite (MOTOR1_PIN1, LOW);
+			digitalWrite (MOTOR1_PIN2, (int)(_speed*255));
+		break;
+
+		case 2:
+			digitalWrite (MOTOR2_PIN1, LOW);
+			digitalWrite (MOTOR2_PIN2, (int)(_speed*255));
+		break;
+	}
+}
+
+void MotorStop(int _motor)
+{
+	//CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
+	switch (_motor)
+	{
+		case 1:
+			digitalWrite (MOTOR1_PIN1, LOW);
+			digitalWrite (MOTOR1_PIN2, LOW);
+		break;
+
+		case 2:
+			digitalWrite (MOTOR2_PIN1, LOW);
+			digitalWrite (MOTOR2_PIN2, LOW);
+		break;
+	}
+}
+
 void loop()
 {
 	get_sensor_data();
 	get_distance();
+	get_lines();
 
 	//HACER DECISIONES
 }
