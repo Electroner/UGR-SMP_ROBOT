@@ -149,6 +149,17 @@ bool readActivation()
 	return !digitalRead(PIN_ACTIVATION);
 }
 
+//FUNCIONES DE CONTROL
+/*
+	get_distance() 		//Obtiene la distancia en cm
+	get_sensor_data() 	//Obtiene los datos de las aceleraciones y velocidades angulares
+	get_lines() 		//Obtiene los datos de las lineas
+	readActivation() 	//Obtiene el estado de la activacion
+	MotorHorario() 		//Mueve el motor en sentido horario
+	MotorAntihorario() 	//Mueve el motor en sentido antihorario
+	MotorStop() 		//Detiene el motor
+*/
+
 void loop()
 {
 	get_sensor_data();
