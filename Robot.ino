@@ -29,7 +29,6 @@ MPU6050 mpu(mpuAddress);
 int ax, ay, az; // Aceleracion
 int gx, gy, gz; // Giroscopio (Aceleracion de g)
 
-long t;		// timepo que demora en llegar el eco
 long distance; // distancia en centimetros
 
 bool lineFront = false; //TRUE si es blanco
@@ -46,13 +45,32 @@ void setup()
 	mpu.initialize();
 	Serial.println(mpu.testConnection() ? F("IMU iniciado correctamente") : F("Error al iniciar IMU"));
 
+	pinMode(PIN_ACTIVATION, INPUT_PULLUP);
+
 	pinMode(TRIGGER_PIN, OUTPUT);   // pin como salida
 	pinMode(ECHO_PIN, INPUT);	   // pin como entrada
+
+	pinMode(MOTOR1_PIN1, OUTPUT);
+	pinMode(MOTOR1_PIN2, OUTPUT);
+	pinMode(MOTOR2_PIN1, OUTPUT);
+	pinMode(MOTOR2_PIN2, OUTPUT);
+
+	pinMode(LINE_FRONT_PIN, INPUT);
+	pinMode(LINE_BACK_PIN, INPUT);
+	pinMode(LINE_LEFT_PIN, INPUT);
+	pinMode(LINE_RIGHT_PIN, INPUT);
+
 	digitalWrite(TRIGGER_PIN, LOW); // Inicializamos el pin con 0
+
+	digitalWrite(MOTOR1_PIN1, LOW);
+	digitalWrite(MOTOR1_PIN2, LOW);
+	digitalWrite(MOTOR2_PIN1, LOW);
+	digitalWrite(MOTOR2_PIN2, LOW);
 }
 
 void get_distance()
 {
+	long t;		// timepo que demora en llegar el eco
 	digitalWrite(TRIGGER_PIN, HIGH);
 	delayMicroseconds(10);
 	digitalWrite(TRIGGER_PIN, LOW);
@@ -81,12 +99,12 @@ void MotorHorario(int _motor,int _speed)
 	switch (_motor)
 	{
 		case 1:
-			digitalWrite (MOTOR1_PIN1, (int)(_speed*255)));
+			digitalWrite (MOTOR1_PIN1, (int)((_speed/100.0)*255.0)));
 			digitalWrite (MOTOR1_PIN2, LOW);
 		break;
 
 		case 2:
-			digitalWrite (MOTOR2_PIN1, (int)(_speed*255));
+			digitalWrite (MOTOR2_PIN1, (int)((_speed/100.0)*255.0));
 			digitalWrite (MOTOR2_PIN2, LOW);
 		break;
 	}
@@ -99,12 +117,12 @@ void MotorAntihorario(int _motor, int _speed)
 	{
 		case 1:
 			digitalWrite (MOTOR1_PIN1, LOW);
-			digitalWrite (MOTOR1_PIN2, (int)(_speed*255));
+			digitalWrite (MOTOR1_PIN2, (int)((_speed/100.0)*255.0));
 		break;
 
 		case 2:
 			digitalWrite (MOTOR2_PIN1, LOW);
-			digitalWrite (MOTOR2_PIN2, (int)(_speed*255));
+			digitalWrite (MOTOR2_PIN2, (int)((_speed/100.0)*255.0));
 		break;
 	}
 }
@@ -126,11 +144,19 @@ void MotorStop(int _motor)
 	}
 }
 
+bool readActivation()
+{
+	return !digitalRead(PIN_ACTIVATION);
+}
+
 void loop()
 {
 	get_sensor_data();
 	get_distance();
 	get_lines();
 
-	//HACER DECISIONES
+	if(readActivation()){
+		//CODIGO DEL ROBOT
+		
+	}
 }
