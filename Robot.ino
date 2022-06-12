@@ -1,42 +1,46 @@
-#include "I2Cdev.h" //https://www.luisllamas.es/arduino-orientacion-imu-mpu-6050/
-#include "MPU6050.h"
-#include "Wire.h"
+#include <MPU6050.h>
+#include <Wire.h>
 
 // SDA - Pin A4
 // SCL - Pin A5
 
-#define PIN_ACTIVATION 7
+#define PIN_ACTIVATION 8
 
 #define TRIGGER_PIN 11
 #define ECHO_PIN 10
 
-#define MOTOR1_PIN1 2
-#define MOTOR1_PIN2 3
-#define MOTOR2_PIN1 4
-#define MOTOR2_PIN2 5
+#define MOTOR1_PIN1 3
+#define MOTOR1_PIN2 5
+#define MOTOR2_PIN1 6
+#define MOTOR2_PIN2 9
 
 #define LINE_FRONT_PIN A0
 #define LINE_BACK_PIN A1
 #define LINE_LEFT_PIN A2
 #define LINE_RIGHT_PIN A3
 
-#define WHITE_LINE_VALUE 600 //Valor por el cual por encima consideramos que es blanco
-#define BLACK_LINE_VALUE 100 //Valor por el cual por debajo consideramos que es negro
+#define WHITE_LINE_VALUE 600 // Valor por el cual por encima consideramos que es blanco
+#define BLACK_LINE_VALUE 100 // Valor por el cual por debajo consideramos que es negro
 
-const int mpuAddress = 0x68; // Puede ser 0x68 o 0x69
+const int mpuAddress = 0x68;
 MPU6050 mpu(mpuAddress);
+
+//ACELEROMETRO:
+//(-x)	: Adelante
+//(y)	: Derecha
+//(z)	: Arriba
 
 int ax, ay, az; // Aceleracion
 int gx, gy, gz; // Giroscopio (Aceleracion de g)
 
 long distance; // distancia en centimetros
 
-bool lineFront = false; //TRUE si es blanco
-bool lineBack = false; 	//TRUE si es blanco
-bool lineLeft = false; 	//TRUE si es blanco
-bool lineRight = false; //TRUE si es blanco
+bool lineFront = false; // TRUE si es blanco
+bool lineBack = false;	// TRUE si es blanco
+bool lineLeft = false;	// TRUE si es blanco
+bool lineRight = false; // TRUE si es blanco
 
-int speed = 100; //Velocidad del robot en %
+int speed = 30; // Velocidad del robot en %
 
 void setup()
 {
@@ -47,8 +51,8 @@ void setup()
 
 	pinMode(PIN_ACTIVATION, INPUT_PULLUP);
 
-	pinMode(TRIGGER_PIN, OUTPUT);   // pin como salida
-	pinMode(ECHO_PIN, INPUT);	   // pin como entrada
+	pinMode(TRIGGER_PIN, OUTPUT); // pin como salida
+	pinMode(ECHO_PIN, INPUT);	  // pin como entrada
 
 	pinMode(MOTOR1_PIN1, OUTPUT);
 	pinMode(MOTOR1_PIN2, OUTPUT);
@@ -70,7 +74,7 @@ void setup()
 
 void get_distance()
 {
-	long t;		// timepo que demora en llegar el eco
+	long t; // timepo que demora en llegar el eco
 	digitalWrite(TRIGGER_PIN, HIGH);
 	delayMicroseconds(10);
 	digitalWrite(TRIGGER_PIN, LOW);
@@ -93,63 +97,63 @@ void get_lines()
 	lineRight = analogRead(LINE_RIGHT_PIN) > WHITE_LINE_VALUE;
 }
 
-void MotorHorario(int _motor,int _speed)
+void MotorHorario(int _motor, int _speed)
 {
-	//CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
+	// CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
 	switch (_motor)
 	{
-		case 1:
-			digitalWrite (MOTOR1_PIN1, (int)((_speed/100.0)*255.0)));
-			digitalWrite (MOTOR1_PIN2, LOW);
+	case 1:
+		analogWrite (MOTOR1_PIN1, (int)((_speed/100.0)*255.0));
+		analogWrite(MOTOR1_PIN2, LOW);
 		break;
 
-		case 2:
-			digitalWrite (MOTOR2_PIN1, (int)((_speed/100.0)*255.0));
-			digitalWrite (MOTOR2_PIN2, LOW);
+	case 2:
+		analogWrite(MOTOR2_PIN1, (int)((_speed / 100.0) * 255.0));
+		analogWrite(MOTOR2_PIN2, LOW);
 		break;
 	}
 }
 
 void MotorAntihorario(int _motor, int _speed)
 {
-	//CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
+	// CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
 	switch (_motor)
 	{
-		case 1:
-			digitalWrite (MOTOR1_PIN1, LOW);
-			digitalWrite (MOTOR1_PIN2, (int)((_speed/100.0)*255.0));
+	case 1:
+		analogWrite(MOTOR1_PIN1, LOW);
+		analogWrite(MOTOR1_PIN2, (int)((_speed / 100.0) * 255.0));
 		break;
 
-		case 2:
-			digitalWrite (MOTOR2_PIN1, LOW);
-			digitalWrite (MOTOR2_PIN2, (int)((_speed/100.0)*255.0));
+	case 2:
+		analogWrite(MOTOR2_PIN1, LOW);
+		analogWrite(MOTOR2_PIN2, (int)((_speed / 100.0) * 255.0));
 		break;
 	}
 }
 
 void MotorStop(int _motor)
 {
-	//CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
+	// CONVENCION: MOTOR IZQUIERDO = 1, MOTOR DERECHO = 2
 	switch (_motor)
 	{
-		case 1:
-			digitalWrite (MOTOR1_PIN1, LOW);
-			digitalWrite (MOTOR1_PIN2, LOW);
+	case 1:
+		analogWrite(MOTOR1_PIN1, LOW);
+		analogWrite(MOTOR1_PIN2, LOW);
 		break;
 
-		case 2:
-			digitalWrite (MOTOR2_PIN1, LOW);
-			digitalWrite (MOTOR2_PIN2, LOW);
+	case 2:
+		analogWrite(MOTOR2_PIN1, LOW);
+		analogWrite(MOTOR2_PIN2, LOW);
 		break;
 	}
 }
 
-bool readActivation()
+int readActivation()
 {
 	return !digitalRead(PIN_ACTIVATION);
 }
 
-//FUNCIONES DE CONTROL
+// FUNCIONES DE CONTROL
 /*
 	get_distance() 		//Obtiene la distancia en cm
 	get_sensor_data() 	//Obtiene los datos de las aceleraciones y velocidades angulares
@@ -166,8 +170,14 @@ void loop()
 	get_distance();
 	get_lines();
 
-	if(readActivation()){
-		//CODIGO DEL ROBOT
-		
+	if (readActivation())
+	{
+		Serial.print("Activado");
+		Serial.println(readActivation());
+	}
+	else
+	{
+		MotorStop(1);
+		MotorStop(2);
 	}
 }
