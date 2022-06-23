@@ -19,8 +19,12 @@
 #define LINE_LEFT_PIN A2
 #define LINE_RIGHT_PIN A3
 
-#define WHITE_LINE_VALUE 300 // Valor por el cual por encima consideramos que es blanco
-#define BLACK_LINE_VALUE 80	 // Valor por el cual por debajo consideramos que es negro
+#define WHITE_LINE_VALUE1 350	// Valor por el cual por encima consideramos que es blanco
+#define BLACK_LINE_VALUE1 300	// Valor por el cual por debajo consideramos que es negro
+
+#define WHITE_LINE_VALUE2 600
+#define BLACK_LINE_VALUE2 500
+
 
 #define DISTANCE_THRESHOLD 40
 
@@ -95,10 +99,8 @@ void get_sensor_data()
 
 void get_lines()
 {
-	lineFront = analogRead(LINE_FRONT_PIN) > WHITE_LINE_VALUE;
-	lineBack = analogRead(LINE_BACK_PIN) > WHITE_LINE_VALUE;
-	lineLeft = analogRead(LINE_LEFT_PIN) > WHITE_LINE_VALUE;
-	lineRight = analogRead(LINE_RIGHT_PIN) > WHITE_LINE_VALUE;
+	lineFront = analogRead(LINE_FRONT_PIN) => WHITE_LINE_VALUE1 && analogRead(LINE_FRONT_PIN) < BLACK_LINE_VALUE1;
+	lineBack = analogRead(LINE_BACK_PIN) => WHITE_LINE_VALUE2 && analogRead(LINE_BACK_PIN) < BLACK_LINE_VALUE2;
 }
 
 void MotorHorario(int _motor, int _speed)
@@ -170,6 +172,8 @@ int readActivation()
 
 bool firsttime = true;
 
+int lastTime;
+
 void loop()
 {
 	//get_sensor_data();
@@ -222,6 +226,11 @@ void loop()
 	{
 		MotorStop(1);
 		MotorStop(2);
-		Serial.println(analogRead(A3));
+		Serial.print("CM: ");
+		Serial.println(distance);
+		//Calcular el tiempo que tarda en ejecutarse el programa
+		Serial.print("Tiempo: ");
+		lastTime = millis();
+		Serial.println(millis() - lastTime);
 	}
 }
