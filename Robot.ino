@@ -6,8 +6,8 @@
 
 #define PIN_ACTIVATION 8
 
-#define TRIGGER_PIN 11
-#define ECHO_PIN 10
+#define TRIGGER_PIN 10
+#define ECHO_PIN 11
 
 #define MOTOR1_PIN1 3
 #define MOTOR1_PIN2 5
