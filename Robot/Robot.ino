@@ -25,7 +25,7 @@
 #define WHITE_LINE_VALUE2 300
 #define BLACK_LINE_VALUE2 100
 
-#define DISTANCE_THRESHOLD 60
+#define DISTANCE_THRESHOLD 70
 
 //Convenio del Motor
 const struct MotorStruct{
@@ -231,5 +231,6 @@ void loop()
 		Serial.print(analogRead(A1));
 		Serial.print("  CM: ");
 		Serial.println(distance);
+		firsttime = true;
 	}
 }
